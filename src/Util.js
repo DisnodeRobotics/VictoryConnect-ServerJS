@@ -10,11 +10,17 @@ exports.parse = function (data) {
 
   return{
     raw: data,
-    subject: subject,
-    type: commandType,
+    subject:  parseInt(subject),
+    type: parseInt(commandType),
     topic: commandTopic,
     values: parsedValues
   }
+
+//  logger.Info("VC Server", "", `Packet from ${info.address}:${info.port} \nSubject: ${subject} \nType: ${commandType} \nTopic: ${commandTopic} \nData: ${values}`)
+};
+
+exports.buildPacket = function (subject, type, topic, data) {
+  return subject + " " + type + " " + topic + " " + data
 
 //  logger.Info("VC Server", "", `Packet from ${info.address}:${info.port} \nSubject: ${subject} \nType: ${commandType} \nTopic: ${commandTopic} \nData: ${values}`)
 };

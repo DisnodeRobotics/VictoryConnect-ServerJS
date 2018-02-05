@@ -1,33 +1,22 @@
 var logger = require('disnode-logger');
-var dgram = require('dgram');
-var server = dgram.createSocket('udp4');
+var net = require('net');
+var ConnectionManager = require('./ConnectionManager')
 
-server.on('error', (err) => {
-  console.log(`server error:\n${err.stack}`);
-  server.close();
+
+var server = net.createServer()
+
+server.on("error", (error)=>{
+
+  logger.Error("VCServer", "ServerError", "Error: " + error)
+
 });
 
-server.on('message', (msg, rinfo) => {
-  console.log(`server got: ${msg} from ${rinfo.address}:${rinfo.port}`);
-  Parse(rinfo, msg);
+server.on("connection", (con)=>{
+  var remoteAddress = con.remoteAddress + ':' + con.remotePort;
+  logger.Success("VCServer", "Connection", "New Client Connected: " + remoteAddress)
+  ConnectionManager.newConnection(con);
 });
 
-server.on('listening', () => {
-  const address = server.address();
-  console.log(`server listening ${address.address}:${address.port}`);
+server.listen(9000, function() {
+  logger.Success("VCServer", "Listen", "Server Started! " )
 });
-
-server.bind(5100);
-
-
-function Parse(info, data){
-  data = data.toString();
-  var parts = data.split(" ");
-  var subject = parts[0];
-  var commandType = parts[1];
-  var commandTopic = parts[2];
-  var values = parts[3].split(";");
-
-  var parsedValues = {};
-  logger.Info("VC Server", "DataParse", `Packet from ${info.address}:${info.port} \nSubject: ${subject} \nType: ${commandType} \nTopic: ${commandTopic} \nData: ${values}`)
-}

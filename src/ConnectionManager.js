@@ -3,7 +3,7 @@ var subscriptions = [];
 var currentDeviceID = 0;
 
 var ConnectionClass = require("./Connection")
-var Util = require("./util.js")
+var Util = require("./Util.js")
 exports.newConnection = function (con) {
 
 

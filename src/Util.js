@@ -1,5 +1,7 @@
+
 exports.parse = function (data) {
   data = data.toString();
+
   var parts = data.split(" ");
   var subject = parts[0];
   var commandType = parts[1];

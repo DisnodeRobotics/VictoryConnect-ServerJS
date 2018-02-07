@@ -9,22 +9,32 @@ var PORT = 9000;
 var Util = require("./Util")
 var Consts = require("./Consts")
 var client = new net.Socket();
-client.connect(PORT, HOST, function() {
+function Connect(){
+    client.connect(PORT, HOST, function() {
 
-    console.log('CONNECTED TO: ' + HOST + ':' + PORT);
-    // Write a message to the socket as soon as the client is connected, the server will receive it as message from the client
-    client.write(message);
-    client.write("0 0 id mock_gyro")
-
-
-    setInterval(function () {
-      client.write(message);
-      console.log("Sending Gyro Data");
-    }, 10);
-});
-
+        console.log('CONNECTED TO: ' + HOST + ':' + PORT);
+        // Write a message to the socket as soon as the client is connected, the server will receive it as message from the client
+        client.write(message);
+        client.write("0 0 id mock_gyro ")
+    
+    
+        setInterval(function () {
+          client.write(message);
+          console.log("Sending Gyro Data");
+        }, 1000);
+    });
+    
+}
+Connect();
 // Add a 'data' event handler for the client socket
 // data is what the server sent to this socket
+client.on("error" , function(err){
+    console.log("SoketError: " + err);
+    console.log("Attempting Reconnect in 5s");
+    setTimeout(function(){
+        Connect();
+    }, 5000);
+})
 client.on('data', function(data) {
 
 

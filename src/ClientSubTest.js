@@ -4,7 +4,7 @@ const message = "1 3 gyro x=10;y=20;z=10";
 
 var net = require('net');
 
-var HOST = '127.0.0.1';
+var HOST = 'pi3-01.local';
 var PORT = 9000;
 var Util = require("./Util")
 var Consts = require("./Consts")

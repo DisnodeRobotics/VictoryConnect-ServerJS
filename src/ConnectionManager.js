@@ -3,6 +3,7 @@ var subscriptions = [];
 var currentDeviceID = 0;
 
 var ConnectionClass = require("./Connection")
+var Cache = require("./Cache.js");
 var Util = require("./Util.js")
 exports.newConnection = function (con) {
 
@@ -36,6 +37,8 @@ exports.addSub = function(conID, topic){
     return;
   }
   subscriptions.push(newSub);
+  var client = getConnect(conID);
+  client.writeTopic(topic, Cache.data[topic]);
 }
 
 exports.closeSocket = function(id){

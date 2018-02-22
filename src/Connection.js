@@ -2,6 +2,7 @@
 var Util = require("./Util");
 var Consts = require("./Consts");
 var ConnectionManager = require("./ConnectionManager")
+var Cache = require("./Cache")
 var Logger = require("disnode-logger");
 module.exports = class Connection {
    constructor(connection, id) {
@@ -25,7 +26,7 @@ module.exports = class Connection {
    onData(data){
      var self = this;
      var parsed = Util.parse(data.toString());
-
+     Cache.onData(parsed);
      switch(parsed.type){
        case Consts.types.SUBMIT:
         self.onSubmitData(parsed);

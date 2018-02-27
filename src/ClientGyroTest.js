@@ -1,5 +1,4 @@
 
-
 const message = "1 0 gyro x=10;y=20;z=10";
 
 var net = require('net');
@@ -15,13 +14,13 @@ function Connect(){
         console.log('CONNECTED TO: ' + HOST + ':' + PORT);
         // Write a message to the socket as soon as the client is connected, the server will receive it as message from the client
         client.write(message);
-        client.write("0 0 id mock_gyro ")
+        client.write("0 0 id gyro ")
     
     
         setInterval(function () {
           client.write(message);
           console.log("Sending Gyro Data");
-        }, 1000);
+        }, 4000);
     });
     
 }

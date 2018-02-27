@@ -4,7 +4,7 @@ const message = "1 3 gyro x=10;y=20;z=10";
 
 var net = require('net');
 
-var HOST = 'pi3-01.local';
+var HOST = '127.0.0.1';
 var PORT = 9000;
 var Util = require("./Util")
 var Consts = require("./Consts")
@@ -17,7 +17,7 @@ function Connect(){
     
         client.write("0 0 id mock_sub ")
         setTimeout(function () {
-          client.write("0 0 subscribe all ")
+          client.write("0 0 subscribe gyro \n ")
         }, 3000);
     });
 }

@@ -21,9 +21,11 @@ exports.onTopic = function(topic, values){
 
   
 
-  for(var i=0;i<toNotify.length;i++){
-    var client = getConnect(toNotify[i]);
-    client.writeTopic(topic, values);
+  if(toNotify){
+    for(var i=0;i<toNotify.length;i++){
+      var client = getConnect(toNotify[i]);
+      client.writeTopic(topic, values);
+    }
   }
 }
 
@@ -37,8 +39,10 @@ exports.addSub = function(conID, topic){
     return;
   }
   subscriptions.push(newSub);
-  var client = getConnect(conID);
-  client.writeTopic(topic, Cache.data[topic]);
+  if(Cache.data[topic]){
+    var client = getConnect(conID);
+    client.writeTopic(topic, Cache.data[topic]);
+  }
 }
 
 exports.closeSocket = function(id){
@@ -50,15 +54,18 @@ exports.closeSocket = function(id){
 function checkForSub(id, topic){
   var subForTopic = getSubsForTopic(topic);
   var subbed = false;
-  for(var i=0;i>subForTopic.length;i++){
-    if(subForTopic[i].id == id){
-      subbed = true;
+  if(subForTopic){
+    for(var i=0;i>subForTopic.length;i++){
+      if(subForTopic[i].id == id){
+        subbed = true;
+      }
     }
   }
   return subbed;
 }
 
 function getSubsForTopic(topic){
+  var toNotify = [];
   for(var i=0;i<subscriptions.length;i++){
     var currentSub = subscriptions[i];
 
@@ -67,6 +74,7 @@ function getSubsForTopic(topic){
     }
 
   }
+  return toNotify;
 }
 function getConnect(id){
   for(var i=0;i<currentConnections.length; i++){

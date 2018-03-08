@@ -3,7 +3,8 @@ var subscriptions = [];
 var currentDeviceID = 0;
 
 var ConnectionClass = require("./Connection")
-var Util = require("./util.js")
+var Cache = require("./Cache.js");
+var Util = require("./Util.js")
 exports.newConnection = function (con) {
 
 
@@ -16,20 +17,15 @@ exports.newConnection = function (con) {
 
 exports.onTopic = function(topic, values){
 
-  var toNotify = [];
+  var toNotify = getSubsForTopic(topic);
 
-  for(var i=0;i<subscriptions.length;i++){
-    var currentSub = subscriptions[i];
+  
 
-    if(currentSub.topic == topic || currentSub.topic == "all"){
-      toNotify.push(currentSub.id);
+  if(toNotify){
+    for(var i=0;i<toNotify.length;i++){
+      var client = getConnect(toNotify[i]);
+      client.writeTopic(topic, values);
     }
-
-  }
-
-  for(var i=0;i<toNotify.length;i++){
-    var client = getConnect(toNotify[i]);
-    client.writeTopic(topic, values);
   }
 }
 
@@ -38,8 +34,15 @@ exports.addSub = function(conID, topic){
     id: conID,
     topic: topic
   }
-
+  if(checkForSub(conID, topic))
+  {
+    return;
+  }
   subscriptions.push(newSub);
+  if(Cache.data[topic]){
+    var client = getConnect(conID);
+    client.writeTopic(topic, Cache.data[topic]);
+  }
 }
 
 exports.closeSocket = function(id){
@@ -48,6 +51,31 @@ exports.closeSocket = function(id){
   delete connection;
 }
 
+function checkForSub(id, topic){
+  var subForTopic = getSubsForTopic(topic);
+  var subbed = false;
+  if(subForTopic){
+    for(var i=0;i>subForTopic.length;i++){
+      if(subForTopic[i].id == id){
+        subbed = true;
+      }
+    }
+  }
+  return subbed;
+}
+
+function getSubsForTopic(topic){
+  var toNotify = [];
+  for(var i=0;i<subscriptions.length;i++){
+    var currentSub = subscriptions[i];
+
+    if(currentSub.topic == topic || currentSub.topic == "all"){
+      toNotify.push(currentSub.id);
+    }
+
+  }
+  return toNotify;
+}
 function getConnect(id){
   for(var i=0;i<currentConnections.length; i++){
     if(currentConnections[i].id == id){

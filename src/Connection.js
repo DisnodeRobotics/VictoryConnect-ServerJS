@@ -1,7 +1,8 @@
 'use strict';
-var Util = require("./util");
-var Consts = require("./consts");
+var Util = require("./Util");
+var Consts = require("./Consts");
 var ConnectionManager = require("./ConnectionManager")
+var Cache = require("./Cache")
 var Logger = require("disnode-logger");
 module.exports = class Connection {
    constructor(connection, id) {
@@ -25,7 +26,7 @@ module.exports = class Connection {
    onData(data){
      var self = this;
      var parsed = Util.parse(data.toString());
-
+     Cache.onData(parsed);
      switch(parsed.type){
        case Consts.types.SUBMIT:
         self.onSubmitData(parsed);
@@ -95,6 +96,9 @@ module.exports = class Connection {
    heartbeatTick(){
      if(!this.heartbeat.recieved){
        this.heartbeat.failed++;
+       if(this.heartbeat.failed <=1){
+         return;
+       }
        Logger.Warning("Connection-" + this.id + ' ' + this.name, "heartbeatTick", "Failed Heartbeat Check #" + this.heartbeat.failed + "/10")
        if(this.heartbeat.failed > 10){
          Logger.Error("Connection-" + this.id + ' ' + this.name, "heartbeatTick", "Failed Heartbeat. Disconnecting")

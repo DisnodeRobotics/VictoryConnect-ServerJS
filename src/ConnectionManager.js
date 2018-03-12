@@ -15,7 +15,7 @@ exports.newConnection = function (con) {
   currentConnections.push(newConnection);
 };
 
-exports.onTopic = function(topic, values){
+exports.onTopic = function(topic, dataString){
 
   var toNotify = getSubsForTopic(topic);
 
@@ -24,7 +24,7 @@ exports.onTopic = function(topic, values){
   if(toNotify){
     for(var i=0;i<toNotify.length;i++){
       var client = getConnect(toNotify[i]);
-      client.writeTopic(topic, values);
+      client.writeTopic(topic, dataString);
     }
   }
 }

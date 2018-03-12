@@ -64,7 +64,7 @@ module.exports = class Connection {
 
        default:
           
-          ConnectionManager.onTopic(packet.topic, packet.values);
+          ConnectionManager.onTopic(packet.topic, packet.dataString);
         break;
      }
    }
@@ -74,14 +74,14 @@ module.exports = class Connection {
    onId(packet){
      if(this.ready == false){
        this.ready = true;
-       this.name = packet.values;
+       this.name = packet.data[0];
        Logger.Success("Connection-" + this.id + ' ' + this.name, "onId", "Connection Succesfully Registered: "  + this.name)
        this.beginHeartbeat();
      }
    }
 
    onSubcribe(packet){
-     ConnectionManager.addSub(this.id, packet.values);
+     ConnectionManager.addSub(this.id, packet.data);
      Logger.Info('Connection-' + this.id + ' ' + this.name, "onId", "Connection subscribed to topic: "  + packet.values)
    }
    beginHeartbeat(){

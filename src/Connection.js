@@ -4,6 +4,7 @@ var Consts = require("./Consts");
 var ConnectionManager = require("./ConnectionManager")
 var Cache = require("./Cache")
 var Logger = require("disnode-logger");
+
 module.exports = class Connection {
    constructor(connection, id) {
      this.connection = connection;
@@ -17,6 +18,11 @@ module.exports = class Connection {
 
      this.connection.on("data", (data)=>{this.onData(data);});
      this.connection.on("error", (err)=>{this.onError(err);})
+
+     
+
+     this.connection.setKeepAlive(true, 0)
+     
      this.connection.write(Util.buildPacket(id, Consts.types.SUBMIT, "welcome", "no_data"))
 
      Logger.Success("Connection-" + this.id, "Constructor", "Connection Succesfully Made!")
@@ -86,11 +92,15 @@ module.exports = class Connection {
    }
    beginHeartbeat(){
      var self = this;
+     var tick = 500;
+     if(this.name == "VictoryDash"){
+       //tick = 10;
+     }
     Logger.Info("Connection-" + this.id + ' ' + this.name, "beginHeartbeat", "Beginning Heartbeat. ")
      self.heartbeat.interval = setInterval(()=> {
-
+        
         self.heartbeatTick();
-     }, 500);
+     }, tick);
    }
 
    heartbeatTick(){

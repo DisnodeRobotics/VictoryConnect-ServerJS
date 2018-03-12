@@ -20,7 +20,7 @@ client.connect(PORT, HOST, function() {
     setInterval(function () {
       client.write(message);
       console.log("Sending Gyro Data");
-    }, 10);
+    }, 500);
 });
 
 // Add a 'data' event handler for the client socket

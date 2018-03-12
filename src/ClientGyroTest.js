@@ -20,13 +20,13 @@ function Connect(){
     
     
         setInterval(function () {
-            index++;
+            index += 10;
             if(index >= 360){
                 index = 0;
             }
           client.write(message + `{${index};1.5;20;}`);
           console.log("Sending Gyro Data");
-        }, 50);
+        }, 100);
     });
     
 }

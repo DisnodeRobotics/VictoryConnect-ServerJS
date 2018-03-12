@@ -81,8 +81,8 @@ module.exports = class Connection {
    }
 
    onSubcribe(packet){
-     ConnectionManager.addSub(this.id, packet.data);
-     Logger.Info('Connection-' + this.id + ' ' + this.name, "onId", "Connection subscribed to topic: "  + packet.values)
+     ConnectionManager.addSub(this.id, packet.data[0]);
+     Logger.Info('Connection-' + this.id + ' ' + this.name, "onId", "Connection subscribed to topic: "  + packet.data[0])
    }
    beginHeartbeat(){
      var self = this;

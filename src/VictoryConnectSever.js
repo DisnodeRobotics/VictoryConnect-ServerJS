@@ -17,6 +17,6 @@ server.on("connection", (con)=>{
   ConnectionManager.newConnection(con);
 });
 
-server.listen(9000, function() {
+server.listen(5800, function() {
   logger.Success("VCServer", "Listen", "Server Started! " )
 });

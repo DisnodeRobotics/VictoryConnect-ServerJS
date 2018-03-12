@@ -1,7 +1,7 @@
 var currentConnections = []
 var subscriptions = [];
 var currentDeviceID = 0;
-
+  
 var ConnectionClass = require("./Connection")
 var Cache = require("./Cache.js");
 var Util = require("./Util.js")
@@ -38,6 +38,7 @@ exports.addSub = function(conID, topic){
   {
     return;
   }
+
   subscriptions.push(newSub);
   if(Cache.data[topic]){
     var client = getConnect(conID);

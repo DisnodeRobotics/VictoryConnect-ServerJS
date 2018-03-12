@@ -11,7 +11,7 @@ exports.parse = function (data) {
   if(valuesString.indexOf(";") != -1){
     values = valuesString.split(";");
   }
-  logger.Info("VC Server", "", `Packet from \nSubject: ${subject} \nType: ${commandType} \nTopic: ${commandTopic} \nData: ${values}`)
+  //logger.Info("VC Server", "", `Packet from \nSubject: ${subject} \nType: ${commandType} \nTopic: ${commandTopic} \nData: ${values}`)
   return{
     raw: data,
     subject:  parseInt(subject),
@@ -25,7 +25,7 @@ exports.parse = function (data) {
 };
 
 exports.buildPacket = function (subject, type, topic, data) {
-  return subject + " " + type + " " + topic + " " + data
+  return subject + " " + type + " " + topic + " " + "{"+data+"}"
 
 //  logger.Info("VC Server", "", `Packet from ${info.address}:${info.port} \nSubject: ${subject} \nType: ${commandType} \nTopic: ${commandTopic} \nData: ${values}`)
 };

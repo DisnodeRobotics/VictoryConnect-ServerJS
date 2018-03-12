@@ -1,14 +1,16 @@
 
-const message = "1 0 gyro {10;20;10;}";
+const message = "1 0 gyro ";
 
 var net = require('net');
 
 var HOST = '127.0.0.1';
-var PORT = 9000;
+var PORT = 5800;
 var Util = require("./Util")
 var Consts = require("./Consts")
 var client = new net.Socket();
+var index = 0;
 function Connect(){
+   
     client.connect(PORT, HOST, function() {
 
         console.log('CONNECTED TO: ' + HOST + ':' + PORT);
@@ -18,9 +20,13 @@ function Connect(){
     
     
         setInterval(function () {
-          client.write(message);
+            index++;
+            if(index >= 360){
+                index = 0;
+            }
+          client.write(message + `{${index};1.5;20;}`);
           console.log("Sending Gyro Data");
-        }, 4000);
+        }, 50);
     });
     
 }

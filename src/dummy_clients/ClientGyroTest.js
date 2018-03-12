@@ -5,7 +5,7 @@ const message = "1 0 gyro x=10;y=20;z=10";
 var net = require('net');
 
 var HOST = '127.0.0.1';
-var PORT = 9000;
+var PORT = 5800;
 var Util = require("../Util")
 var Consts = require("../Consts")
 var client = new net.Socket();

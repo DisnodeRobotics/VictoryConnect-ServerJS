@@ -1,5 +1,5 @@
 
-const message = "1 0 navx ";
+const message = "1 0 motors ";
 
 var net = require('net');
 
@@ -16,7 +16,7 @@ function Connect(){
         console.log('CONNECTED TO: ' + HOST + ':' + PORT);
         // Write a message to the socket as soon as the client is connected, the server will receive it as message from the client
         client.write(message);
-        client.write("0 0 id {GyroMockClient} ")
+        client.write("0 0 id {MotorsMockClient} ")
     
     
         setInterval(function () {
@@ -24,9 +24,9 @@ function Connect(){
             if(index >= 360){
                 index = 0;
             }
-          client.write(message + `{connected:);${index};1.5;20;0;0;0;}`);
+          client.write(message + `{${index};${index};${index};${index};${index};${index};${index};}`);
           
-        }, 1000/60);
+        }, 50);
     });
     
 }

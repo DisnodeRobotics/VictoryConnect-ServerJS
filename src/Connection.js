@@ -27,43 +27,69 @@ module.exports = class Connection {
 
     Logger.Success("Connection-" + this.id, "Constructor", "Connection Succesfully Made!")
 
-   
+
 
 
 
   }
 
-  startToSend(){
-        
+  startToSend() {
+
     var self = this;
-    if(this.toSendLoop){
+    if (this.toSendLoop) {
       clearInterval(this.toSendLoop);
     }
-    this.toSendLoop = setInterval(()=>{self.toSendTick()}, 1000/this.tickRate);
-      
+    this.toSendLoop = setInterval(() => { self.toSendTick() }, 1000 / this.tickRate);
+
   }
 
-  toSendTick(){
-    for(var i=0;i<this.toSend.length;i++){
+  toSendTick() {
+    for (var i = 0; i < this.toSend.length; i++) {
       var cur = this.toSend[i];
       this.connection.write(Util.buildPacket(this.id, Consts.types.SUBMIT, cur.topic, cur.value));
-      this.toSend.splice(i,1);
+      this.toSend.splice(i, 1);
     }
   }
 
   onData(data) {
     var self = this;
-    var parsed = Util.parse(data.toString());
-    Cache.onData(parsed);
-    switch (parsed.type) {
-      case Consts.types.SUBMIT:
-        self.onSubmitData(parsed);
-        break;
 
-      case Consts.types.REQUEST:
-        self.onRequestData(parsed);
-        break;
+    data = data.toString();
+    if (data.indexOf("\r\n") != -1) {
+      var dataArry = data.split("\r\n");
+      dataArry.splice(dataArry.length - 1, 1);
+     
+      for(var i=0;i<dataArry.length;i++){
+       
+        var parsed = Util.parse(dataArry[i].toString());
+        
+        Cache.onData(parsed);
+        switch (parsed.type) {
+          case Consts.types.SUBMIT:
+            self.onSubmitData(parsed);
+            break;
+  
+          case Consts.types.REQUEST:
+            self.onRequestData(parsed);
+            break;
+        }
+      }
+
+    } else {
+      var parsed = Util.parse(data.toString());
+      Cache.onData(parsed);
+      switch (parsed.type) {
+        case Consts.types.SUBMIT:
+          self.onSubmitData(parsed);
+          break;
+
+        case Consts.types.REQUEST:
+          self.onRequestData(parsed);
+          break;
+      }
     }
+
+
   }
 
   onError() {
@@ -87,7 +113,7 @@ module.exports = class Connection {
         break;
 
       case "subscribe":
-        console.log(packet);
+       
         self.onSubcribe(packet);
         break;
 
@@ -104,7 +130,7 @@ module.exports = class Connection {
     if (this.ready == false) {
       this.ready = true;
       this.name = packet.data[0];
-      if(packet.data[1]){
+      if (packet.data[1]) {
         this.tickRate = parseInt(packet.data[1]);
         Logger.Info("Connection-" + this.id + ' ' + this.name, "onId", "Setting Tick Rate: " + this.tickRate)
         this.startToSend();
@@ -160,17 +186,17 @@ module.exports = class Connection {
 
   writeTopic(topic, value) {
     var packetAlreadyAdded = false;
-    for(var i=0;i<this.toSend.length;i++){
-      if(this.toSend[i].topic == topic){
+    for (var i = 0; i < this.toSend.length; i++) {
+      if (this.toSend[i].topic == topic) {
         packetAlreadyAdded = true;
-        this.toSend[i] = {topic: topic, value:value};
+        this.toSend[i] = { topic: topic, value: value };
       }
     }
-    if(packetAlreadyAdded){
+    if (packetAlreadyAdded) {
       return;
     }
 
-    this.toSend.push({topic: topic, value:value});
+    this.toSend.push({ topic: topic, value: value });
   }
 
 }

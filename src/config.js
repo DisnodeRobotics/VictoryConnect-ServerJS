@@ -1,4 +1,5 @@
 module.exports = {
+    verbose: true,
     UDP:{
         port: 5000,
         autoRestart: true,

@@ -1,5 +1,5 @@
 const Logger = require('disnode-logger');
-
+const Config = require("../config");
 class Topic{
     constructor(newTopicInfo){
         this.name = newTopicInfo.name;
@@ -17,6 +17,10 @@ class Topic{
     SubmitData(newData){
         this.value = newData;
         this.lastUpdate = new Date();
+        
+        if(Config.verbose){
+            Logger.Info(`Topic-${this.name}`, "SubmitData", `Submitting data: ${newData}`);
+        }
     }
     
 }

@@ -22,7 +22,7 @@ exports.parse = function (data) {
  
 };
 
-exports.buildPacket = function (subject, type, topic, data) {
+exports.buildPacket = function (type, topic, data) {
   if(typeof(data) === "String"){
     return type + " " + topic + " " + "{"+data+"}"
   }else{

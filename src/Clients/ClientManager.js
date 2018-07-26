@@ -7,7 +7,8 @@ module.exports.RequestID = () =>{
 }
 
 module.exports.AddClient = (client) =>{
+    Logger.Info("ClientManager", "AddClient", `Client ${client.id} added!`)
     clients[client.id] = client;
-    
+
 }
 

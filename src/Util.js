@@ -23,7 +23,13 @@ exports.parse = function (data) {
 };
 
 exports.buildPacket = function (subject, type, topic, data) {
-  return type + " " + topic + " " + "{"+data+"}"
+  if(typeof(data) === "String"){
+    return type + " " + topic + " " + "{"+data+"}"
+  }else{
+    
+     return type + " " + topic + " " + "{"+data.join(';')+"}"
+  }
+ 
 
 //  logger.Info("VC Server", "", `Packet from ${info.address}:${info.port} \nSubject: ${subject} \nType: ${commandType} \nTopic: ${commandTopic} \nData: ${values}`)
 };

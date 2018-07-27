@@ -1,5 +1,6 @@
 const Logger = require('disnode-logger');
 const Config = require("../config");
+const TopicList = require("./TopicList")
 class Topic{
     constructor(newTopicInfo){
         this.name = newTopicInfo.name;
@@ -8,6 +9,7 @@ class Topic{
         this.lastUpdate = new Date();
 
         Logger.Success(`Topic-${this.name}`, "constructor", `Created topic with info\n ${JSON.stringify(newTopicInfo, " ", 2)}`);
+        TopicList.AddTopic(this);
     }
 
     GetValue(){
@@ -24,3 +26,5 @@ class Topic{
     }
     
 }
+
+module.exports = Topic;

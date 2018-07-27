@@ -28,6 +28,7 @@ module.exports.Start = (settings) =>{
     
 }
 
+
 module.exports.Send = (msg, client) =>{
     this.sendBuffer.push({
         msg: msg,

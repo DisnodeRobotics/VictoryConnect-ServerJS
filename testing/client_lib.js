@@ -5,6 +5,7 @@ const UDP = require('net');
 
 const con = net.createConnection(5000,"localhost");
 
+const subscriptions = {};
 
 con.on("connect", ()=>{
     console.log("Connected!");
@@ -32,7 +33,13 @@ module.exports.SendSubmit = (topic, value) =>{
 module.exports.NewTopic = (name, path, protocol="UDP")=>{
     this.SendCommand("new_topic", [name, path,protocol])
 }
-
+module.exports.Subscribe = (path, cb)=>{
+    subscriptions.push({
+        path: path,
+        callback: cb
+    })
+    this.SendCommand("subscribe", [path])
+}
 module.exports.SetValue = (path, data)=>{
     this.SendSubmit(path, data)
 }

@@ -5,7 +5,7 @@ class Topic{
     constructor(newTopicInfo){
         this.name = newTopicInfo.name;
         this.path = newTopicInfo.path;
-        this.value = null;
+        this.data = null;
         this.lastUpdate = new Date();
 
         Logger.Success(`Topic-${this.name}`, "constructor", `Created topic with info\n ${JSON.stringify(newTopicInfo, " ", 2)}`);
@@ -17,7 +17,7 @@ class Topic{
     }
 
     SubmitData(newData){
-        this.value = newData;
+        this.data = newData;
         this.lastUpdate = new Date();
         
         if(Config.verbose){

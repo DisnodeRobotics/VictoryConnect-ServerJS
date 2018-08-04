@@ -78,5 +78,11 @@ function onCommand(packet){
             Logger.Info("MessageReciever", "onCommand(subscribe)", `Client#${packet.client.id} subscribing to ${subPath}`)
             Subscriptions.AddSub(packet.client, subPath);
         break;
+
+        case "client_tickrate":
+            let tickRate = packet.data[0];
+            Logger.Info("MessageReciever", "onCommand(client_tickrate)", `Client#${packet.client.id} setting tick rate to ${tickRate}`)
+            packet.client.SetTickRate(tickRate);
+        break;
     }
 }

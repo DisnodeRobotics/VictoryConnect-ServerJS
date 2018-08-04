@@ -1,4 +1,5 @@
 const lib = require("./client_lib");
+lib.SetTickRate("LOL");
 lib.NewTopic("Test Topic 1", "topics/test/1")
 lib.SetValue("topics/test/1", ["Test Value!"])
 lib.NewTopic("Test Topic 2", "topics/test/2")

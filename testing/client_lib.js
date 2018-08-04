@@ -5,7 +5,7 @@ const UDP = require('net');
 
 const con = net.createConnection(5000,"localhost");
 
-const subscriptions = {};
+const subscriptions = [];
 
 con.on("connect", ()=>{
     console.log("Connected!");
@@ -18,6 +18,11 @@ con.on("data", (data)=>{
 
 module.exports.SendCommand = (topic, values) =>{
     var packetString = Utils.buildPacket(Consts.types.COMMAND, topic, values);
+    con.write(packetString+"~");
+}
+
+module.exports.SetTickRate = (tickRate) =>{
+    var packetString = Utils.buildPacket(Consts.types.COMMAND, "client_tickrate", [tickRate]);
     con.write(packetString+"~");
 }
 

@@ -1,9 +1,8 @@
 module.exports = {
     verbose: true,
-    UDP:{
+    TCP:{
         port: 5000,
         autoRestart: true,
-        packetSize: 4096,
-        tickRate: 60
+        packetSize: 4096
     }
 }

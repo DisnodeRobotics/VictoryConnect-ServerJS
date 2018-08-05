@@ -1,5 +1,6 @@
 const Logger = require("disnode-logger");
 const TCPConnection = require("./Connections/TCPConnection");
+const UDPConnection = require("./Connections/UDPConnection")
 const Config = require("./config")
 
 const Client = require('./Clients/Client')
@@ -11,11 +12,19 @@ async function StartConnections(){
 
     Logger.Info("Server", "StartConnections", "Starting and Binding TCP Connection");
     TCPConnection.BindOnStart(OnStart);
-    TCPConnection.BindOnConnection(OnConnection);
     TCPConnection.BindOnError(OnError);
     await TCPConnection.Start(Config.TCP);
     ConnectionArray[TCPConnection.type] = TCPConnection;
     Logger.Success("Server", "StartConnections", "TCP Connection Started and Bound!");
+
+    /*
+    Logger.Info("Server", "StartConnections", "Starting and Binding UDP Connection");
+    UDPConnection.BindOnStart(OnStart);
+    UDPConnection.BindOnError(OnError);
+    await UDPConnection.Start(Config.UDP);
+    ConnectionArray[UDPConnection.type] = UDPConnection;
+    Logger.Success("Server", "StartConnections", "UDP Connection Started and Bound!");
+    */
     
 
 }
@@ -30,8 +39,3 @@ function OnStart(connection){
 function OnError(connection, error){
     Logger.Error("Server", `${connection.name} Error`, error)
 }
-
-function OnConnection(connection, newSocket){
-    new Client(connection, newSocket)
-}
-

@@ -2,22 +2,34 @@ const Logger = require('disnode-logger');
 const Util = require("./Util");
 const Consts = require("./Consts");
 const TopicList = require("./Topics/TopicList")
+const Client = require("./Clients/Client")
+const ClientManager = require("./Clients/ClientManager")
 const Topic = require("./Topics/Topic")
 const Config = require('./config')
 const Subscriptions = require('./Subscriptions')
-module.exports.OnMessage = (dataString, client) =>{
+module.exports.OnMessage = (dataString, socketID, conType) =>{
     let packets = Util.parse(dataString);
     if(packets.length <= 0){
         return;
     }
     for (let i = 0; i < packets.length; i++) {
         const _packet = packets[i];
+        
+        _packet.socket = socketID;
+        _packet.connection = conType;
+
+       
+        let clientID = ClientManager.GetClientIDBySocketID(socketID);
+        if(Config.verbose) Logger.Info("MessageReciver", "OnMessage", `Decoded client id (${clientID}) from socket id ${socketID}`)
+
+        _packet.client = clientID;
         if(Config.verbose){
-            Logger.Info("MessageReciver", "OnMessage", `Got packet from ${client.id}:\n${JSON.stringify(_packet, " ", 2)}`)
+            Logger.Info("MessageReciver", "OnMessage", `Got packet from ${socketID} by ${conType}: ${JSON.stringify(_packet)}`)
         }
-        _packet.client = client;
-    
         switch(_packet.type){
+            case Consts.types.ERROR:
+                onError(_packet);
+            break;
             case Consts.types.SUBMIT:
                 onSubmit(_packet);
             break;
@@ -32,7 +44,7 @@ module.exports.OnMessage = (dataString, client) =>{
 }
 
 function onError(packet){
-
+    Logger.Warning("MessageReciver", "OnError", "VC Error: " + packet.data)
 }
 
 function onSubmit(packet){
@@ -56,7 +68,9 @@ function onRequest(packet){
     var toSend ="";
     for (let i = 0; i < foundTopics.length; i++) {
         const topic = foundTopics[i];
-    
+        if(!topic.data){
+            topic.data = [];
+        }
         packet.client.SendPacket(Consts.types.SUBMIT,  topic.path, topic.data)
         
     }
@@ -64,6 +78,16 @@ function onRequest(packet){
 
 function onCommand(packet){
     switch(packet.path){
+
+        case "register":
+            var clientID = packet.data[0];
+            var clientName = packet.data[1];
+
+
+            Logger.Info("MessageReciever", "onCommand(register)", `Registering new client ${clientID}, ${clientName}`)
+            const newClient = new Client(clientID, clientName)
+            newClient.AddSocket(packet.connection, packet.socket)
+            break;
         case "new_topic":
             let name = packet.data[0];
             let path = packet.data[1];

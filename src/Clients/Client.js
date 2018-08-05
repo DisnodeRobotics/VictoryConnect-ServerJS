@@ -5,36 +5,37 @@ const Util = require("../Util")
 const MessageReciver = require("../MessageReciver")
 const Config = require("../config")
 class Client{
-    constructor(connection, socket){
-        this.connection = connection;
-        this.socket     = socket;
-        this.active     = false;
-        this.registered = false;
-        this.id         = ClientManager.RequestID();
-        this.sendQueue  = [];
-        this.tickRate   = 50;
+    constructor(id, name){
+        this.connections  = {};
+        this.sockets      = {};
+        this.active       = false;
+        this.id           = id;
+        this.name         = name;
+        this.sendQueue    = [];
+        this.tickRate     = 50;
         this.tickInterval = null;
 
         Logger.Success(`Client-${this.id}`, "constructor", "New Client Made!")
 
         ClientManager.AddClient(this);
         var self = this;
-        socket.on("error", this.OnError)
-        socket.on("data", (data)=>{
-            MessageReciver.OnMessage(data.toString(), self);
-        });
 
         Logger.Info(`Client-${this.id}`, "constructor", "Sending Client Info ID Packet")
-        this.SendPacket(Consts.types.SUBMIT, "client/info/id", [this.id]);
 
         this.SetTickLoop();
 
     }
 
+    AddSocket(connection, socketID){
+        Logger.Info(`Client-${this.id}`, "AddSocket", `Adding new socket with type ${connection.type} and socket id ${socketID}`)
+        this.connections[connection.type] = true;
+        this.sockets[connection.type]     = socketID;
+    }
+
     SetTickLoop(){
         var self = this;
         this.tickInterval = setInterval(()=>{self.OnSendTick(self)}, (1000/self.tickRate));
-        Logger.Info("Client-${this.id}", "Init", "Started tick rate with delay: " + (1000/self.tickRate));
+        Logger.Info(`Client-${this.id}`, "Init", "Started tick rate with delay: " + (1000/self.tickRate));
     }
 
     OnError(err){
@@ -67,9 +68,9 @@ class Client{
         
     }
 
-    SendPacket(msgType, topic, data){
+    SendPacket(msgType, topic, data, method){
         var packetString = Util.buildPacket(msgType,topic,data);
-        this.sendQueue.push(packetString);
+        this.sendQueue.push({connection: method, data: packetString});
         if(Config.verbose){
             Logger.Info(`Client-${this.id}`, "SendPacket", `Added packet for ${topic} to queue. Current Queue: ${this.sendQueue.lenght}`);
         }

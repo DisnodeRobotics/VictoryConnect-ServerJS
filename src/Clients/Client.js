@@ -27,9 +27,10 @@ class Client{
     }
 
     AddSocket(connection, socketID){
-        Logger.Info(`Client-${this.id}`, "AddSocket", `Adding new socket with type ${connection.type} and socket id ${socketID}`)
-        this.connections[connection.type] = true;
-        this.sockets[connection.type]     = socketID;
+
+        this.connections[connection] = true;
+        this.sockets[connection]     = socketID;
+        Logger.Info(`Client-${this.id}`, "AddSocket", `Adding new socket with type ${connection} and socket id ${socketID}, Now Active: ${JSON.stringify(this.sockets)}`)
     }
 
     SetTickLoop(){

@@ -83,10 +83,15 @@ function onCommand(packet){
             var clientID = packet.data[0];
             var clientName = packet.data[1];
 
-
             Logger.Info("MessageReciever", "onCommand(register)", `Registering new client ${clientID}, ${clientName}`)
-            const newClient = new Client(clientID, clientName)
-            newClient.AddSocket(packet.connection, packet.socket)
+            
+            if(ClientManager.GetClient(clientID)){
+                ClientManager.GetClient(clientID).AddSocket(packet.connection, packet.socket);
+            }else{
+                const newClient = new Client(clientID, clientName)
+                newClient.AddSocket(packet.connection, packet.socket)
+            }
+            
             break;
         case "new_topic":
             let name = packet.data[0];

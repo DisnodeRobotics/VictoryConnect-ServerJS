@@ -17,14 +17,14 @@ async function StartConnections(){
     ConnectionArray[TCPConnection.type] = TCPConnection;
     Logger.Success("Server", "StartConnections", "TCP Connection Started and Bound!");
 
-    /*
+    
     Logger.Info("Server", "StartConnections", "Starting and Binding UDP Connection");
     UDPConnection.BindOnStart(OnStart);
     UDPConnection.BindOnError(OnError);
     await UDPConnection.Start(Config.UDP);
     ConnectionArray[UDPConnection.type] = UDPConnection;
     Logger.Success("Server", "StartConnections", "UDP Connection Started and Bound!");
-    */
+    
     
 
 }

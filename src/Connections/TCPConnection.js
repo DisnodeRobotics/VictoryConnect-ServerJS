@@ -1,5 +1,6 @@
 const Logger = require("disnode-logger");
 const Util = require('../Util');
+const Consts = require('../Consts')
 const Net = require ('net');
 const Config = require("../config")
 const ConnectionManager = require("./ConnectionManager")
@@ -21,12 +22,14 @@ module.exports.Start = (settings) =>{
         self.server.on("connection", (newCon)=>{
             Logger.Info("TCPConnection", "TCPEvent-connection", "New Connection recieved! Binding data events");
             newCon.on("error", (err)=>{Logger.Warning("TCPConnection", "TCPEvent-error", err.message)});
+            
             this.sockets["TCPSOCK-"+this.socketID] = newCon;
             newCon.id = "TCPSOCK-"+this.socketID
-            this. socketID++;
+            this.socketID++;
 
             newCon.on("data", (data)=>{self.OnData(newCon, data.toString())});
 
+            this.SendSocket(newCon.id, Util.buildPacket(Consts.types.COMMAND, "welcome", [newCon.id]))
            
 
         });

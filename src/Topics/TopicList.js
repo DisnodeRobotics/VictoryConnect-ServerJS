@@ -7,6 +7,15 @@ module.exports.AddTopic = (topic) => {
     topicList.push(topic);
 }
 
+module.exports.SetTopic = (path, value, upset = false) => {
+    const topic_ = this.GetTopicStrict(path);
+    if (topic_.length < 0) {
+        Logger.Warning("TopicManager", "SetTopic", `Failed to find topic at ${path}`)
+        return;
+    }
+
+    topic_[0].SetValue(value);
+}
 
 module.exports.GetTopicStrict = (topicPath) => {
 
@@ -17,24 +26,27 @@ module.exports.GetTopicStrict = (topicPath) => {
             found.push(topicList[i]);
         }
     }
-    
+
     return found;
 }
 
 module.exports.GetTopicFuzzy = (topicPath) => {
 
-  //  topicPath.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
-
+    //  topicPath.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+    var found = [];
+    if (topicPath === "*") {
+        found = topicList;
+        return found;
+    }
     const regex = new RegExp(topicPath, 'gi');
 
-    var found = [];
 
     for (var i = 0; i < topicList.length; i++) {
-        
-        if (topicList[i].path.startsWith(topicPath)) { 
+
+        if (topicList[i].path.startsWith(topicPath)) {
             found.push(topicList[i]);
         }
     }
-    
+
     return found;
 }

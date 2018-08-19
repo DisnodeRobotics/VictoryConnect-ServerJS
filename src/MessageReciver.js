@@ -19,7 +19,7 @@ module.exports.OnMessage = (dataString, socketID, conType) =>{
         _packet.connection = conType;
 
        
-        let clientID = ClientManager.GetClientIDBySocketID(socketID);
+        var clientID = ClientManager.GetClientIDBySocketID(socketID, conType);
         if(Config.verbose) Logger.Info("MessageReciver", "OnMessage", `Decoded client id (${clientID}) from socket id ${socketID}`)
 
         _packet.client = clientID;
@@ -48,18 +48,10 @@ function onError(packet){
 }
 
 function onSubmit(packet){
-    const foundTopics = TopicList.GetTopicStrict(packet.path);
-    if(foundTopics.length > 0){
-        foundTopics[0].data = packet.data;
-        Subscriptions.OnTopicUpdate(packet.client, foundTopics[0])
-        if(Config.verbose){
-            Logger.Info("MessageReciver", "onSubmit", `Set topic @ ${packet.path} to ${packet.data}`)
-        }
-    }else{
-        if(Config.verbose){
-            Logger.Warning("MessageReciver", "onSubmit", `Failed to find any topics @ ${packet.path}`)
-        }
+    if(Config.verbose){
+        Logger.Info("MessageReciver", "onSubmit", `Trying to topic at ${packet.path} to ${packet.data}`)
     }
+    TopicList.SetTopic(packet.path, packet.data);
 }
 
 function onRequest(packet){
@@ -71,7 +63,7 @@ function onRequest(packet){
         if(!topic.data){
             topic.data = [];
         }
-        packet.client.SendPacket(Consts.types.SUBMIT,  topic.path, topic.data)
+        ClientManager.GetClient(packet.client).SendPacket(Consts.types.SUBMIT,  topic.path, topic.data, topic.protocol)
         
     }
 }
@@ -83,11 +75,13 @@ function onCommand(packet){
             var clientID = packet.data[0];
             var clientName = packet.data[1];
 
-            Logger.Info("MessageReciever", "onCommand(register)", `Registering new client ${clientID}, ${clientName}`)
+            
             
             if(ClientManager.GetClient(clientID)){
+                Logger.Success("MessageReciever", "onCommand(register)", `Found existing ${clientID}, ${clientName}. Adding socket`)
                 ClientManager.GetClient(clientID).AddSocket(packet.connection, packet.socket);
             }else{
+                Logger.Success("MessageReciever", "onCommand(register)", `Registering new client ${clientID}, ${clientName}`)
                 const newClient = new Client(clientID, clientName)
                 newClient.AddSocket(packet.connection, packet.socket)
             }
@@ -106,6 +100,15 @@ function onCommand(packet){
             let subPath = packet.data[0];
             Logger.Info("MessageReciever", "onCommand(subscribe)", `Client#${packet.client.id} subscribing to ${subPath}`)
             Subscriptions.AddSub(packet.client, subPath);
+        break;
+
+        case "heartbeat":
+            let timestamp = packet.data[0];
+            if(ClientManager.GetClient(packet.client)){
+                ClientManager.GetClient(packet.client).RecvHeartbeat(timestamp, packet.connection);
+            }
+
+           
         break;
 
         case "client_tickrate":

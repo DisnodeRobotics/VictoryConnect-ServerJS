@@ -1,5 +1,5 @@
 module.exports = {
-    verbose: true,
+    verbose: false,
     TCP:{
         port: 5000,
         autoRestart: true,

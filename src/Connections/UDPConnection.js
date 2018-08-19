@@ -11,7 +11,7 @@ module.exports.Start = (settings) => {
     this.name = "UDP Server";
     this.sockets = {};
     this.socketID = 0;
-    Logger.Info("UDPConnection", "Init", `Starting UDP server with settings:\n --- ${JSON.stringify(settings, " ", 2)}`)
+    Logger.Info("UDPConnection", "Init", `Starting UDP server with settings: ${JSON.stringify(settings)}`)
 
     var self = this;
 
@@ -50,7 +50,7 @@ module.exports.Start = (settings) => {
 }
 
 module.exports.SendSocket = (socketID, msg) => {
-    this.sockets[socketID].write(msg);
+    this.server.send(msg, this.sockets[socketID].port, this.sockets[socketID].address);
 }
 module.exports.GetSocketID = (socket) => {
 

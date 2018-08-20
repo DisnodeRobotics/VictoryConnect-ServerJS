@@ -23,17 +23,16 @@ module.exports.Start = (settings) => {
             var foundSocket_ = self.CheckForSocket(rInfo);
 
             if (!foundSocket_) {
-                Logger.Info("UDPConnection", "UDPEvent-connection", "New Connection recieved!");
+
 
                 rInfo.id = "UDPSOCK-" + this.socketID;
                 this.sockets["UDPSOCK-" + this.socketID] = rInfo;
                 this.socketID++;
+                Logger.Info("UDPConnection", "UDPEvent-connection", `Unknown Packet Recieved! Assuming new client ${rInfo.address}:${rInfo.port}. Giving ID: ${rInfo.id}`);
                 self.OnData(rInfo, msg.toString());
             } else {
                 self.OnData(foundSocket_, msg.toString());
             }
-
-
         });
         self.server.on("error", (err) => { Logger.Warning("UDPConnection", "UDPEvent-error", err.message) });
 
@@ -58,10 +57,9 @@ module.exports.GetSocketID = (socket) => {
 
 module.exports.CheckForSocket = (rInfo) => {
     var found = null;
-    for (var i = 0; i < Object.keys(this.sockets); i++) {
-        var socket_ = this.socket[Object.keys(this.sockets)[i]];
-        delete socket_.id;
-        if (rInfo == socket) {
+    for (var i = 0; i < Object.keys(this.sockets).length; i++) {
+        var socket = this.sockets[Object.keys(this.sockets)[i]];
+        if (rInfo.address == socket.address && rInfo.port == socket.port) {
             found = socket;
         }
     }

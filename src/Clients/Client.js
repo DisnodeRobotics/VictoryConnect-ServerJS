@@ -37,8 +37,7 @@ class Client {
         new Topic({ name: `Client ${this.id} Timeout`, path: `clients/${this.id}/timeout`, protocol: "TCP", data: this.timeout });
         new Topic({ name: `Client ${this.id} Retrys`, path: `clients/${this.id}/retrys`, protocol: "TCP", data: this.retrys });
 
-
-
+        
     }
 
     AddSocket(connection, socketID) {
@@ -48,7 +47,10 @@ class Client {
             socket: socketID,
             lastActive: new Date().getTime(),
             ping: 0,
-            failed: 0
+            failed: 0,
+            heartbeat: setInterval(()=>{
+                self.CheckHeartbeat(connection);
+            },self.timeout)
         };
         this.sockets[connection] = socketID;
         this.sendQueue[connection] = [];
@@ -92,10 +94,13 @@ class Client {
         this.UpdateConnectionInfo(connection)        
 
         this.SendPacket(Consts.types.COMMAND, "welcome", [this.timeout]);
+        var self = this;
+        
     }
 
     UpdateConnectionInfo(conType){
-        let connection = this.connections[conType];
+        const connection = this.connections[conType];
+        if(!connection){Logger.Error(`Client-${this.id}`, "UpdateConnectionInfo", `Failed to find ${conType} object!`)}
         TopicList.SetTopic(`clients/${this.id}/connections/${conType}/active`,connection.sentPackets);
         TopicList.SetTopic(`clients/${this.id}/connections/${conType}/socket`,connection.socket);
         TopicList.SetTopic(`clients/${this.id}/connections/${conType}/lastactive`,connection.lastActive);
@@ -106,7 +111,9 @@ class Client {
     KillConnection(connection) {
         this.connections[connection].active = false;
         this.sockets[connection] = null;
+        this.UpdateConnectionInfo(connection);
         Logger.Info(`Client-${this.id}`, "KillConnection", `${connection} Killed!`)
+        clearInterval(this.connections[connection].heartbeat);
     }
 
     SetTickLoop() {
@@ -153,21 +160,40 @@ class Client {
 
     }
 
-    SendPacket(msgType, topic, data, method) {
+    CheckMethod(method){
+        const allMethods = Object.keys(this.connections);
+        var newMethod = null;
         if(!method){
-            method = Object.keys(this.connections)[0];
+            newMethod = allMethods[0];
         }
-        if (!this.connections[method].active) {
-            var newMethod = Object.keys(this.connections)[0];
+        
+        if (!this.connections[method] ||!this.connections[method].active) {
+          
+            for(var i=0;i<allMethods.length;i++){
+                if(allMethods[i].active){
+                    newMethod = allMethods[i];
+                }
+            }
             Logger.Warning(`Client-${this.id}`, "SendPacket", `Tried to send packet using ${method} but such connection isnt avalible. Using ${newMethod} instead`);
-            method = newMethod;
+        }else{
+            newMethod = method;
         }
 
+        return newMethod;
+    }
+
+    SendPacket(msgType, topic, data, method) {
+        
+        if(!this.CheckMethod(method)){
+            Logger.Warning(`Client-${this.id}`, "SendPacket", `No avaible connections to send packet!`);
+            return;
+        }
+        const methodToUse = this.CheckMethod(method);
         var packetString = Util.buildPacket(msgType, topic, data);
-        this.sendQueue[method].push(packetString);
+        this.sendQueue[methodToUse].push(packetString);
 
         if (Config.verbose) {
-            Logger.Info(`Client-${this.id}`, "SendPacket", `Added packet for ${topic} to queue. Current Queue: ${this.sendQueue[method].length}`);
+            Logger.Info(`Client-${this.id}`, "SendPacket", `Added packet for ${topic} to queue. Current Queue: ${this.sendQueue[methodToUse].length}`);
         }
     }
 
@@ -194,8 +220,25 @@ class Client {
         connection.ping = ping;
 
         this.UpdateConnectionInfo(conType);
-       
-        
+    }
+
+    CheckHeartbeat(conType){
+        let connection = this.connections[conType];
+
+        let lastUpdated = new Date().getTime() - connection.lastActive;
+      
+        if(lastUpdated > this.timeout){
+            connection.failed++;
+            Logger.Warning(`Client-${this.id}`, "CheckHeartbeat", conType + " Packet Timeout #" + connection.failed +" (Ping: " + lastUpdated +"ms)");
+            if(connection.failed > this.retrys){
+                Logger.Warning(`Client-${this.id}`, "CheckHeartbeat", `${conType} Timedout! Killing socket!`);
+                this.KillConnection(conType);
+            }
+        }else{
+            connection.failed = 0;
+        }
+
+        this.UpdateConnectionInfo(conType);
     }
 
 }

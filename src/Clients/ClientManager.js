@@ -18,11 +18,15 @@ module.exports.GetClient = (clientID) =>{
 
 module.exports.GetClientIDBySocketID = (socketID, conType) =>{
     let found = null;
-    for(var i=0;i<Object.keys(clients).length;i++){
-        const _obj = clients[Object.keys(clients)[i]];
-        if(_obj.sockets[conType] == socketID){
-            found = _obj;
-          
+    let clientKeys = Object.keys(clients)
+    for(var i=0;i<clientKeys.length;i++){
+        const client = clients[clientKeys[i]];
+        if(!client.connections[conType]){
+            return -1;
+        }
+        
+        if(client.connections[conType].socket == socketID){
+            found = client;
         }
     }
     if(found){

@@ -2,13 +2,15 @@ const Logger = require("disnode-logger");
 const TCPConnection = require("./Connections/TCPConnection");
 const UDPConnection = require("./Connections/UDPConnection")
 const Config = require("./config")
-
+const ServerCommands = require('./ServerCommands')
 const Client = require('./Clients/Client')
 
 const ConnectionArray = {};
 StartConnections();
 async function StartConnections(){
     // UDP Startup
+
+    ServerCommands.Bind();
 
     Logger.Info("Server", "StartConnections", "Starting and Binding TCP Connection");
     TCPConnection.BindOnStart(OnStart);

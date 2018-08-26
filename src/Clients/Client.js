@@ -1,44 +1,53 @@
-const Logger = require("disnode-logger");
-const ClientManager = require("./ClientManager");
-const ConnectionManager = require('../Connections/ConnectionManager')
-const Topic = require('../Topics/Topic')
-const TopicList = require('../Topics/TopicList')
-const Consts = require("../Consts")
-const Util = require("../Util")
-const MessageReciver = require("../MessageReciver")
-const Config = require("../config")
+const Logger              = require("disnode-logger");
+const ClientManager       = require("./ClientManager");
+const ConnectionManager   = require('../Connections/ConnectionManager')
+const Topic               = require('../Topics/Topic')
+const TopicList           = require('../Topics/TopicList')
+const Consts              = require("../Consts")
+const Util                = require("../Util")
+const MessageReciver      = require("../MessageReciver")
+const Config              = require("../config")
+
+/*
+Client class describes a "Client" on a VCNetwork. A client acts as point of contact on a network, this is usually one 
+subsystem such as a Logger or Controller.
+
+A client can have multiple connections assigned to it such as UDP and TCP. This allows each client to use the best
+protocol for a given set of data.
+
+A client ID is decided client side, this allows for easy reconnecting and client assiocation. Example of a id would be: 
+robot-rio
+*/
 class Client {
     constructor(id, name) {
-        this.connections = {};
-        this.sockets = {};
-        this.active = false;
-        this.id = id;
-        this.name = name;
-        this.sendQueue = {};
-        this.tickRate = 50;
-        this.tickInterval = null;
-        this.sentPackets = 0;
-        this.timeout = 500;
-        this.retrys = 3;
-        this.failed = 0;
+        this.connections  = {};    // Stores Connection objects, using connection type as key. (UDP/TCP)
+        this.active       = false; // Is the client currently active. (Not being used atm, but could be used to determine if there is an active socket)
+        this.id           = id;    // ID of the client, See above
+        this.name         = name;  // Name of the client for display purposes
+        this.sendQueue    = {};    // Queue of packets to send per connection type. Using connection type as key (UDP/TCP)
+        this.tickRate     = 20;    // Tick rate of the client. How many times a secound to send packets/empty the queue
+        this.tickInterval = null;  // Var to hold tickrate timer so we can clear/reset it during operation
+        this.sentPackets  = 0;     // Total number of sent packet in the client
+        this.timeout      = 500;   // How long between packets before we count the connection as timedout.
+        this.retrys       = 3;     // How many "timedout" packets before we consider the connection dead.
+        this.failed       = 0;     // How many "timedout" packets have we had in a row.
 
-        Logger.Success(`Client-${this.id}`, "constructor", "New Client Made!")
+        ClientManager.AddClient(this); // Register the client to the ClientManager, This tracks all active clients
 
-        ClientManager.AddClient(this);
-        var self = this;
+        this.SetTickLoop(); //Start the tick system to send messages in the queue at a fixed rate.
 
-        Logger.Info(`Client-${this.id}`, "constructor", "Sending Client Info ID Packet")
 
-        this.SetTickLoop();
-
+        // Set Client Info for the network. This allows the network to know and view client statuses.
         new Topic({ name: `Client ${this.id} Tick Rate`, path: `clients/${this.id}/tickrate`, protocol: "TCP", data: this.tickRate });
         new Topic({ name: `Client ${this.id} Name`, path: `clients/${this.id}/name`, protocol: "TCP", data: this.name });
         new Topic({ name: `Client ${this.id} Sent Packets`, path: `clients/${this.id}/packets`, protocol: "TCP", data: this.sentPackets });
         new Topic({ name: `Client ${this.id} Timeout`, path: `clients/${this.id}/timeout`, protocol: "TCP", data: this.timeout });
         new Topic({ name: `Client ${this.id} Retrys`, path: `clients/${this.id}/retrys`, protocol: "TCP", data: this.retrys });
 
+        //Print the creation of the client was successful
+        Logger.Success(`Client-${this.id}`, "constructor", "New Client Made!")
         
-    }
+    } //constructor
 
     AddSocket(connection, socketID) {
         var self = this;
@@ -52,9 +61,8 @@ class Client {
                 self.CheckHeartbeat(connection);
             },self.timeout)
         };
-        this.sockets[connection] = socketID;
         this.sendQueue[connection] = [];
-        Logger.Info(`Client-${this.id}`, "AddSocket", `Adding new socket with type ${connection} and socket id ${socketID}, Now Active: ${JSON.stringify(this.sockets)}`);
+        Logger.Info(`Client-${this.id}`, "AddSocket", `Adding new socket with type ${connection} and socket id ${socketID}`);
 
         new Topic({
             name: `Client ${this.id} Connection ${connection} Active`, 
@@ -110,7 +118,6 @@ class Client {
 
     KillConnection(connection) {
         this.connections[connection].active = false;
-        this.sockets[connection] = null;
         this.UpdateConnectionInfo(connection);
         Logger.Info(`Client-${this.id}`, "KillConnection", `${connection} Killed!`)
         clearInterval(this.connections[connection].heartbeat);
@@ -148,7 +155,7 @@ class Client {
             if (Config.verbose) {
                 Logger.Info(`Client-${ref.id}`, `OnSendTick`, `Sent "${sendString}" from client ${ref.id}!`);
             }
-            ConnectionManager.SendString(sendString, method_, this.sockets[method_])
+            ConnectionManager.SendString(sendString, method_, this.connections[method_].socket)
 
             if (Config.verbose) {
                 Logger.Success(`Client-${ref.id}`, "OnSendTick", `Sent ${sentCount} packets!`);

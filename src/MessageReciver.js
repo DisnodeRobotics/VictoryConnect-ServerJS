@@ -1,12 +1,13 @@
-const Logger = require('disnode-logger');
-const Util = require("./Util");
-const Consts = require("./Consts");
-const TopicList = require("./Topics/TopicList")
-const Client = require("./Clients/Client")
-const ClientManager = require("./Clients/ClientManager")
-const Topic = require("./Topics/Topic")
-const Config = require('./config')
-const Subscriptions = require('./Subscriptions')
+const Logger        = require('disnode-logger');
+const Util          = require("./Util");
+const Consts        = require("./Consts");
+const TopicList     = require("./Topics/TopicList");
+const Client        = require("./Clients/Client");
+const ClientManager = require("./Clients/ClientManager");
+const Topic         = require("./Topics/Topic");
+const Config        = require('./config');
+const Subscriptions = require('./Subscriptions');
+const Command       = require("./Commands");
 module.exports.OnMessage = (dataString, socketID, conType) =>{
     let packets = Util.parse(dataString);
     if(packets.length <= 0){
@@ -14,11 +15,10 @@ module.exports.OnMessage = (dataString, socketID, conType) =>{
     }
     for (let i = 0; i < packets.length; i++) {
         const _packet = packets[i];
-        
+
         _packet.socket = socketID;
         _packet.connection = conType;
-
-       
+        if(Config.verbose) Logger.Info("MessageReciver", "OnMessage", `Parsing packet from ${socketID} on ${conType}`)
         var clientID = ClientManager.GetClientIDBySocketID(socketID, conType);
         if(Config.verbose) Logger.Info("MessageReciver", "OnMessage", `Decoded client id (${clientID}) from socket id ${socketID}`)
 
@@ -56,65 +56,17 @@ function onSubmit(packet){
 
 function onRequest(packet){
     const foundTopics = TopicList.GetTopicFuzzy(packet.path);
-
     var toSend ="";
     for (let i = 0; i < foundTopics.length; i++) {
         const topic = foundTopics[i];
         if(!topic.data){
             topic.data = [];
         }
-        ClientManager.GetClient(packet.client).SendPacket(Consts.types.SUBMIT,  topic.path, topic.data, topic.protocol)
-        
+        ClientManager.GetClient(packet.client).SendPacket(Consts.types.SUBMIT,  topic.path, topic.data, topic.protocol);
     }
 }
 
 function onCommand(packet){
-    switch(packet.path){
-
-        case "register":
-            var clientID = packet.data[0];
-            var clientName = packet.data[1];
-
-            
-            
-            if(ClientManager.GetClient(clientID)){
-                Logger.Success("MessageReciever", "onCommand(register)", `Found existing ${clientID}, ${clientName}. Adding socket`)
-                ClientManager.GetClient(clientID).AddSocket(packet.connection, packet.socket);
-            }else{
-                Logger.Success("MessageReciever", "onCommand(register)", `Registering new client ${clientID}, ${clientName}`)
-                const newClient = new Client(clientID, clientName)
-                newClient.AddSocket(packet.connection, packet.socket)
-            }
-            
-            break;
-        case "new_topic":
-            let name = packet.data[0];
-            let path = packet.data[1];
-            let protocol = packet.data[2];
-            Logger.Info("MessageReciever", "onCommand(new_topic)", "Creating new topic: " + name + " @ " + path)
-            new Topic({name: name, path: path, protocol: protocol});
-
-        break;
-
-        case "subscribe":
-            let subPath = packet.data[0];
-            Logger.Info("MessageReciever", "onCommand(subscribe)", `Client#${packet.client.id} subscribing to ${subPath}`)
-            Subscriptions.AddSub(packet.client, subPath);
-        break;
-
-        case "heartbeat":
-            let timestamp = packet.data[0];
-            if(ClientManager.GetClient(packet.client)){
-                ClientManager.GetClient(packet.client).RecvHeartbeat(timestamp, packet.connection);
-            }
-
-           
-        break;
-
-        case "client_tickrate":
-            let tickRate = packet.data[0];
-            Logger.Info("MessageReciever", "onCommand(client_tickrate)", `Client#${packet.client.id} setting tick rate to ${tickRate}`)
-            packet.client.SetTickRate(tickRate);
-        break;
-    }
+    Command.OnCommand(packet);
+    
 }

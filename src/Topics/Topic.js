@@ -10,7 +10,7 @@ class Topic{
         this.data = newTopicInfo.data || [];
         this.lastUpdate = new Date();
 
-        Logger.Success(`Topic-${this.name}`, "constructor", `Created topic with info\n ${JSON.stringify(newTopicInfo, " ", 2)}`);
+        Logger.Success(`Topic-${this.id}`, "constructor", `Created topic "${this.name}" at ${this.path} using ${this.protocol}.`);
         TopicList.AddTopic(this);
     }
 

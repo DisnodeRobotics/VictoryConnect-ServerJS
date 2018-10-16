@@ -41,18 +41,6 @@ module.exports.Bind = () => {
         Subscriptions.AddSub(packet.client, subPath);
     });
 
-    Commands.RegisterCommand("server", "server/subscribe", (packet) => {
-        let subPath = packet.data[0];
-        Logger.Info("ServerCommands", "server/subscribe", `Client#${packet.client.id} subscribing to ${subPath}`)
-        Subscriptions.AddSub(packet.client, subPath);
-    });
-
-    Commands.RegisterCommand("server", "server/subscribe", (packet) => {
-        let subPath = packet.data[0];
-        Logger.Info("ServerCommands", "server/subscribe", `Client#${packet.client.id} subscribing to ${subPath}`)
-        Subscriptions.AddSub(packet.client, subPath);
-    });
-
     Commands.RegisterCommand("server", "server/heartbeat", (packet) => {
         let timestamp = packet.data[0];
         if (ClientManager.GetClient(packet.client)) {
@@ -62,8 +50,12 @@ module.exports.Bind = () => {
 
     Commands.RegisterCommand("server", "server/tickrate", (packet) => {
         let tickRate = packet.data[0];
-        Logger.Info("MessageReciever", "server/tickrate", `Client#${packet.client.id} setting tick rate to ${tickRate}`)
-        packet.client.SetTickRate(tickRate);
+        Logger.Info("MessageReciever", "server/tickrate", `Client#${packet.client.id} setting tick rate to ${tickRate}`);
+        if (ClientManager.GetClient(packet.client)) {
+            ClientManager.GetClient(packet.client).SetTickRate(tickRate);
+        }
+        
+      
     });
 
     Commands.RegisterCommand("server", "server/command", (packet) => {

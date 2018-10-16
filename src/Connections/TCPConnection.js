@@ -31,9 +31,13 @@ module.exports.Start = (settings) => {
             newCon.on("error", (err) => { 
                 Logger.Warning("TCPConnection-"+newCon.id, "TCPEvent-error", err.message) 
                 const client = ClientManager.GetClient(ClientManager.GetClientIDBySocketID(newCon.id, "TCP"));
-                client.KillConnection("TCP")
+                if(client){
+                    client.KillConnection("TCP")
+                }else{
+                    Logger.Error("TCPConnection-"+newCon.id, "TCPEvent-error", "Failed to kill socket. Could not locate client! ") 
+                }
             });
-            this.SendSocket(newCon.id, Util.buildPacket(Consts.types.COMMAND, "welcome", [newCon.id]))
+           // this.SendSocket(newCon.id, Util.buildPacket(Consts.types.COMMAND, "welcome", [newCon.id]))
 
 
         });

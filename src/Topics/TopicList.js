@@ -9,11 +9,11 @@ module.exports.AddTopic = (topic) => {
 
 module.exports.SetTopic = (path, value, upset = false) => {
     const topic_ = this.GetTopicStrict(path);
-    if (topic_.length < 0) {
+    if (topic_.length <= 0 || topic_[0] == {}) {
         Logger.Warning("TopicManager", "SetTopic", `Failed to find topic at ${path}`)
         return;
     }
-
+    
     topic_[0].SetValue(value);
 }
 

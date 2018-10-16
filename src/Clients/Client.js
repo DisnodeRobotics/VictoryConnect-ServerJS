@@ -4,6 +4,7 @@ const ConnectionManager   = require('../Connections/ConnectionManager')
 const Topic               = require('../Topics/Topic')
 const TopicList           = require('../Topics/TopicList')
 const Consts              = require("../Consts")
+const Commands            = require("../Commands")
 const Util                = require("../Util")
 const MessageReciver      = require("../MessageReciver")
 const Config              = require("../config")
@@ -25,7 +26,7 @@ class Client {
         this.id           = id;    // ID of the client, See above
         this.name         = name;  // Name of the client for display purposes
         this.sendQueue    = {};    // Queue of packets to send per connection type. Using connection type as key (UDP/TCP)
-        this.tickRate     = 20;    // Tick rate of the client. How many times a secound to send packets/empty the queue
+        this.tickRate     = 50;    // Tick rate of the client. How many times a secound to send packets/empty the queue
         this.tickInterval = null;  // Var to hold tickrate timer so we can clear/reset it during operation
         this.sentPackets  = 0;     // Total number of sent packet in the client
         this.timeout      = 500;   // How long between packets before we count the connection as timedout.
@@ -101,7 +102,7 @@ class Client {
 
         this.UpdateConnectionInfo(connection)        
 
-        this.SendPacket(Consts.types.COMMAND, "welcome", [this.timeout]);
+        this.SendPacket(Consts.types.COMMAND, "server/welcome", [socketID, connection, this.timeout, this.retrys]);
         var self = this;
         
     }
@@ -119,6 +120,7 @@ class Client {
     KillConnection(connection) {
         this.connections[connection].active = false;
         this.UpdateConnectionInfo(connection);
+        Commands.RemoveRegisterAll(this.id);
         Logger.Info(`Client-${this.id}`, "KillConnection", `${connection} Killed!`)
         clearInterval(this.connections[connection].heartbeat);
     }
@@ -227,6 +229,8 @@ class Client {
         connection.ping = ping;
 
         this.UpdateConnectionInfo(conType);
+
+        this.SendPacket(Consts.types.COMMAND, "server/hearbeat_resp", [new Date().getTime], conType);
     }
 
     CheckHeartbeat(conType){

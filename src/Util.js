@@ -40,9 +40,9 @@ function parseSinglePacket(data) {
 
 exports.buildPacket = function (type, topic, data) {
   if (!Array.isArray(data)) {
-    return type + " " + topic + " " + "{" + data + "}"
+    return type + " " + topic + " " + "{" + data + "}~\n"
   }else {
-    return type + " " + topic + " " + "{" + data.join(';') + "}"
+    return type + " " + topic + " " + "{" + data.join(';') + "}~\n"
   }
 
   //  logger.Info("VC Server", "", `Packet from ${info.address}:${info.port} \nSubject: ${subject} \nType: ${commandType} \nTopic: ${commandTopic} \nData: ${values}`)

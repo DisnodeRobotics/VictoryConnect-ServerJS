@@ -14,13 +14,15 @@ module.exports.RegisterCommand = (client, path, cb = null) => {
         });
         Logger.Success("Commands", "RegisterCommand", `${client} Subscribed to command ${path}!`)
     }
-   
 
   
 }
 
 module.exports.OnCommand = (packet) => {
-
+    if(!packet.path){
+        Logger.Warning("Commands", "OnCommand", "Malformed command packet: " + packet.raw);
+        return;
+    }
     for (let i = 0; i < commandRegisters.length; i++) {
         const register = commandRegisters[i];
 
@@ -53,3 +55,34 @@ module.exports.GetRegister = (client, path)=>{
 
     return found;
 }
+
+
+module.exports.RemoveRegister = (client, path)=>{
+   
+    for (let i = 0; i < commandRegisters.length; i++) {
+        const register = commandRegisters[i];
+
+        if (path.startsWith(register.path) && register.client == client) {
+           commandRegisters.splice(i,1);
+           Logger.Info("Commands", "RemoveRegister", `Removed Register by ${client} to ${path}`)
+        }
+    }
+
+
+}
+
+
+module.exports.RemoveRegisterAll = (client)=>{
+   
+    for (let i = 0; i < commandRegisters.length; i++) {
+        const register = commandRegisters[i];
+
+        if ( register.client == client) {
+           commandRegisters.splice(i,1);
+           Logger.Info("Commands", "RemoveRegister", `Removed Register by ${client} to ${register.path}`)
+        }
+    }
+
+
+}
+

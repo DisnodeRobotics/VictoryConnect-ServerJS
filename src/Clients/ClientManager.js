@@ -19,10 +19,12 @@ module.exports.GetClient = (clientID) =>{
 module.exports.GetClientIDBySocketID = (socketID, conType) =>{
     let found = null;
     let clientKeys = Object.keys(clients)
+    
     for(var i=0;i<clientKeys.length;i++){
         const client = clients[clientKeys[i]];
+        
         if(!client.connections[conType]){
-            return -1;
+            continue;
         }
         
         if(client.connections[conType].socket == socketID){

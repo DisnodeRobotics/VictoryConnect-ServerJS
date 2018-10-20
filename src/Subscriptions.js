@@ -25,7 +25,12 @@ module.exports.OnTopicUpdate = (topic) =>{
                 Logger.Info("Subscriptions", "OnTopicUpdate", `${topic.name} updating to client ${client.id} using ${topic.protocol}`)
             }
 
-            client.SendPacket(Consts.types.SUBMIT, topic.path, topic.data, topic.protocol);
+            if(client){
+                client.SendPacket(Consts.types.SUBMIT, topic.path, topic.data, topic.protocol);
+            }else{
+                Logger.Error("Subscriptions", "OnTopicUpdate", `Cannot find local client ${_sub.client}.`)
+            }
+
         }
     }
 }

@@ -57,7 +57,7 @@ class Client {
             socket: socketID,
             lastActive: new Date().getTime(),
             ping: 0,
-            failed: 0,
+            failed: -2,
             heartbeat: setInterval(()=>{
                 self.CheckHeartbeat(connection);
             },self.timeout)
@@ -101,12 +101,16 @@ class Client {
         });
 
         this.UpdateConnectionInfo(connection)        
-
-        this.SendPacket(Consts.types.COMMAND, "server/welcome", [socketID, connection, this.timeout, this.retrys]);
+        this.SendWelcomePacket(connection);
+       
         var self = this;
         
     }
-
+    SendWelcomePacket(conType){
+        var self = this;
+        self.SendPacket(Consts.types.COMMAND, "server/welcome", [conType, self.timeout, self.retrys]);
+        Logger.Info(`Client-${this.id}`, "SendWelcomePacket", "Sending welcome packet");
+    }
     UpdateConnectionInfo(conType){
         const connection = this.connections[conType];
         if(!connection){Logger.Error(`Client-${this.id}`, "UpdateConnectionInfo", `Failed to find ${conType} object!`)}
@@ -239,6 +243,7 @@ class Client {
         let lastUpdated = new Date().getTime() - connection.lastActive;
       
         if(lastUpdated > this.timeout){
+           // this.SendWelcomePacket(conType);
             connection.failed++;
             Logger.Warning(`Client-${this.id}`, "CheckHeartbeat", conType + " Packet Timeout #" + connection.failed +" (Ping: " + lastUpdated +"ms)");
             if(connection.failed > this.retrys){

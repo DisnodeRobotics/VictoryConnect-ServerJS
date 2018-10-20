@@ -62,6 +62,8 @@ module.exports.Bind = () => {
         let commandToSub = packet.data[0];
         Logger.Info("MessageReciever", "server/command", `Client#${packet.client.id} registering command ${commandToSub}`);
         Commands.RegisterCommand(packet.client, commandToSub);
+
+       
     });
 
 }

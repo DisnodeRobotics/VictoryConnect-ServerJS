@@ -156,7 +156,7 @@ class Client {
             let sentCount = 0;
             let sendString = "";
             for (let i = 0; i < queue_.length; i++) {
-                const _toSend = queue_[i];
+                const _toSend = queue_[i].packetString;
                 sendString += _toSend + "~";
                 queue_.splice(i, 1);
                 sentCount++;
@@ -206,7 +206,18 @@ class Client {
         }
         const methodToUse = this.CheckMethod(method);
         var packetString = Util.buildPacket(msgType, topic, data);
-        this.sendQueue[methodToUse].push(packetString);
+
+        var found = false;
+        for(var i=0;i<this.sendQueue[methodToUse].length;i++){
+            if(this.sendQueue[methodToUse][i].path == topic){
+                found = true;
+                this.sendQueue[methodToUse][i].packetString = packetString;
+            }
+        }
+        if(!found){
+            this.sendQueue[methodToUse].push({path: topic, packetString: packetString});
+        }
+     
 
         if (Config.verbose) {
             Logger.Info(`Client-${this.id}`, "SendPacket", `Added packet for ${topic} to queue. Current Queue: ${this.sendQueue[methodToUse].length}`);

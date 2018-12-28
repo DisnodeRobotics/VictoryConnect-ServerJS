@@ -28,8 +28,8 @@ module.exports.OnTopicUpdate = (topic) =>{
     
     for (let i = 0; i < subscriptions.length; i++) {
         const _sub = subscriptions[i];
-    
-        if(topic.path.startsWith(_sub.path)){
+        
+        if(topic.path.startsWith(_sub.path) || _sub.path == "*"){
             var client = ClientManager.GetClient(_sub.client);
             if(Config.verbose){
                 

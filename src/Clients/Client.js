@@ -70,7 +70,7 @@ class Client {
             name: `Client ${this.id} Connection ${connection} Active`, 
             path: `clients/${this.id}/connections/${connection}/active`, 
             protocol: "TCP", 
-            data: this.connections[connection].active 
+            data: "true"
         });
 
         new Topic({
@@ -115,7 +115,7 @@ class Client {
     UpdateConnectionInfo(conType){
         const connection = this.connections[conType];
         if(!connection){Logger.Error(`Client-${this.id}`, "UpdateConnectionInfo", `Failed to find ${conType} object!`)}
-        TopicList.SetTopic(`clients/${this.id}/connections/${conType}/active`,connection.sentPackets);
+        TopicList.SetTopic(`clients/${this.id}/connections/${conType}/active`, connection.active);
         TopicList.SetTopic(`clients/${this.id}/connections/${conType}/socket`,connection.socket);
         TopicList.SetTopic(`clients/${this.id}/connections/${conType}/lastactive`,connection.lastActive);
         TopicList.SetTopic(`clients/${this.id}/connections/${conType}/ping`,connection.ping);
@@ -124,6 +124,7 @@ class Client {
 
     KillConnection(connection) {
         this.connections[connection].active = false;
+      
         this.UpdateConnectionInfo(connection);
         SubscriptionManager.RemoveSubs(this.id);
         Commands.RemoveRegisterAll(this.id);

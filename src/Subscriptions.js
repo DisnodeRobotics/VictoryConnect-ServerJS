@@ -14,6 +14,16 @@ module.exports.AddSub = (client, path) =>{
     Logger.Success("Subscriptions", "AddSub", `${client} Subscribed to path ${path}!`)
 }
 
+module.exports.RemoveSubs = (client) =>{
+    for (let i = 0; i < subscriptions.length; i++) {
+        const _sub = subscriptions[i];
+    
+        if(_sub.client == client){
+            subscriptions.splice(i,1);
+        }
+    }
+}
+
 module.exports.OnTopicUpdate = (topic) =>{
     
     for (let i = 0; i < subscriptions.length; i++) {
@@ -22,7 +32,7 @@ module.exports.OnTopicUpdate = (topic) =>{
         if(topic.path.startsWith(_sub.path)){
             var client = ClientManager.GetClient(_sub.client);
             if(Config.verbose){
-                Logger.Info("Subscriptions", "OnTopicUpdate", `${topic.name} updating to client ${client.id} using ${topic.protocol}`)
+                
             }
 
             if(client){

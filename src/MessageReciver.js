@@ -19,7 +19,9 @@ module.exports.OnMessage = (dataString, socketID, conType) =>{
         _packet.socket = socketID;
         _packet.connection = conType;
         if(Config.verbose) Logger.Info("MessageReciver", "OnMessage", `Parsing packet from ${socketID} on ${conType}`)
+        
         var clientID = ClientManager.GetClientIDBySocketID(socketID, conType);
+
         if(Config.verbose) Logger.Info("MessageReciver", "OnMessage", `Decoded client id (${clientID}) from socket id ${socketID}`)
 
         _packet.client = clientID;

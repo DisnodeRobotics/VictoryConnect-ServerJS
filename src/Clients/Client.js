@@ -1,6 +1,7 @@
 const Logger              = require("disnode-logger");
 const ClientManager       = require("./ClientManager");
 const ConnectionManager   = require('../Connections/ConnectionManager')
+const SubscriptionManager = require("../Subscriptions")
 const Topic               = require('../Topics/Topic')
 const TopicList           = require('../Topics/TopicList')
 const Consts              = require("../Consts")
@@ -124,6 +125,7 @@ class Client {
     KillConnection(connection) {
         this.connections[connection].active = false;
         this.UpdateConnectionInfo(connection);
+        SubscriptionManager.RemoveSubs(this.id);
         Commands.RemoveRegisterAll(this.id);
         Logger.Info(`Client-${this.id}`, "KillConnection", `${connection} Killed!`)
         clearInterval(this.connections[connection].heartbeat);
@@ -242,7 +244,7 @@ class Client {
 
         let lastUpdated = new Date().getTime() - connection.lastActive;
       
-        if(lastUpdated > this.timeout){
+        if(lastUpdated > this.timeout + 50){
            // this.SendWelcomePacket(conType);
             connection.failed++;
             Logger.Warning(`Client-${this.id}`, "CheckHeartbeat", conType + " Packet Timeout #" + connection.failed +" (Ping: " + lastUpdated +"ms)");

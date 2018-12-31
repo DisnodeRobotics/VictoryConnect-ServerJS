@@ -32,7 +32,7 @@ module.exports.Start = (settings) => {
             newCon.on("data", (data) => {
                 data = data.toString();
                 currentPacket += data;
-                if(currentPacket.index("~") != -1){
+                if(currentPacket.indexOf("~") != -1){
                     self.OnData(newCon, data.toString()) 
                     self.currentPacket = "";
                 }

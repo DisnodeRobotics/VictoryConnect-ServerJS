@@ -43,8 +43,9 @@ module.exports.Bind = () => {
 
     Commands.RegisterCommand("server", "server/heartbeat", (packet) => {
         let timestamp = packet.data[0];
+        let ping      = packet.data[1];
         if (ClientManager.GetClient(packet.client)) {
-            ClientManager.GetClient(packet.client).RecvHeartbeat(timestamp, packet.connection);
+            ClientManager.GetClient(packet.client).RecvHeartbeat(timestamp,ping, packet.connection);
         }
     });
 

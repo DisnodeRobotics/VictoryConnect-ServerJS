@@ -28,12 +28,12 @@ module.exports.Start = (settings) => {
             this.socketID++;
 
             this.currentPacket = "";
-
+            var self = this;
             newCon.on("data", (data) => {
                 data = data.toString();
-                currentPacket += data;
-                if(currentPacket.indexOf("~") != -1){
-                    self.OnData(newCon, data.toString()) 
+                self.currentPacket += data;
+                if(self.currentPacket.indexOf("~") != -1){
+                    self.OnData(newCon, self.currentPacket) 
                     self.currentPacket = "";
                 }
             });

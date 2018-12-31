@@ -236,19 +236,17 @@ class Client {
         this.SetTickLoop();
     }
 
-    RecvHeartbeat(timestamp, conType) {
+    RecvHeartbeat(timestamp,ping, conType) {
         let connection = this.connections[conType];
-        timestamp = parseInt(timestamp);
- 
-        let ping = new Date().getTime() - timestamp;
 
+        ConnectionManager.SendString(Util.buildPacket(Consts.types.COMMAND, "server/hearbeat_resp", [timestamp,conType]), conType, this.connections[conType].socket)
         connection.lastActive = timestamp;
         connection.failed = 0;
         connection.ping = ping;
 
         this.UpdateConnectionInfo(conType);
 
-        this.SendPacket(Consts.types.COMMAND, "server/hearbeat_resp", [new Date().getTime], conType);
+       
     }
 
     CheckHeartbeat(conType){

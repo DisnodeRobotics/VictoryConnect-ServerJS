@@ -27,7 +27,15 @@ module.exports.Start = (settings) => {
             newCon.id = "TCPSOCK-" + this.socketID
             this.socketID++;
 
-            newCon.on("data", (data) => { self.OnData(newCon, data.toString()) });
+            this.currentPacket = "";
+
+            newCon.on("data", (data) => {
+                data = data.toString();
+                currentPacket += data;
+                if(currentPacket.index("~") != -1){
+                    self.OnData(newCon, data.toString()) 
+                }
+            });
             newCon.on("error", (err) => { 
                 Logger.Warning("TCPConnection-"+newCon.id, "TCPEvent-error", err.message) 
                 const client = ClientManager.GetClient(ClientManager.GetClientIDBySocketID(newCon.id, "TCP"));

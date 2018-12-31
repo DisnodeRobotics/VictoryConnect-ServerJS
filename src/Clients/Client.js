@@ -109,7 +109,7 @@ class Client {
     }
     SendWelcomePacket(conType){
         var self = this;
-        self.SendPacket(Consts.types.COMMAND, "server/welcome", [conType, self.timeout, self.retrys]);
+        self.SendPacket(Consts.types.COMMAND, "server/welcome", [conType, self.timeout, self.retrys],conType);
         Logger.Info(`Client-${this.id}`, "SendWelcomePacket", "Sending welcome packet");
     }
     UpdateConnectionInfo(conType){
@@ -162,7 +162,7 @@ class Client {
                 sentCount++;
             }
             if (Config.verbose) {
-                Logger.Info(`Client-${ref.id}`, `OnSendTick`, `Sent "${sendString}" from client ${ref.id}!`);
+                Logger.Info(`Client-${ref.id}`, `OnSendTick`, `Sent "${sendString}" from client ${ref.id} using ${method_} and socket: ${this.connections[method_].socket}!`);
             }
             ConnectionManager.SendString(sendString, method_, this.connections[method_].socket)
 
@@ -199,7 +199,9 @@ class Client {
     }
 
     SendPacket(msgType, topic, data, method) {
-        
+        if (Config.verbose) {
+            Logger.Info(`Client-${this.id}`, "SendPacket", `Sending packet: ${topic} on ${method}`);
+        }
         if(!this.CheckMethod(method)){
             Logger.Warning(`Client-${this.id}`, "SendPacket", `No avaible connections to send packet!`);
             return;
@@ -220,7 +222,7 @@ class Client {
      
 
         if (Config.verbose) {
-            Logger.Info(`Client-${this.id}`, "SendPacket", `Added packet for ${topic} to queue. Current Queue: ${this.sendQueue[methodToUse].length}`);
+            Logger.Info(`Client-${this.id}`, "SendPacket", `Added packet for ${topic} to queue using ${method}. Current Queue: ${this.sendQueue[methodToUse].length}`);
         }
     }
 

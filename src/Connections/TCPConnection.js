@@ -34,6 +34,7 @@ module.exports.Start = (settings) => {
                 currentPacket += data;
                 if(currentPacket.index("~") != -1){
                     self.OnData(newCon, data.toString()) 
+                    self.currentPacket = "";
                 }
             });
             newCon.on("error", (err) => { 

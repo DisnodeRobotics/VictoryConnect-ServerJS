@@ -253,7 +253,9 @@ class Client {
 
     CheckHeartbeat(conType){
         let connection = this.connections[conType];
-
+        if(connection.active == false){
+            return;
+        }
         let lastUpdated = new Date().getTime() - connection.lastActive;
       
         if(lastUpdated > this.timeout + 50){

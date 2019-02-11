@@ -1,5 +1,6 @@
 module.exports = {
     verbose: false,
+    autoGenerateTopics: true,
     TCP:{
         port: 5000,
         autoRestart: true,

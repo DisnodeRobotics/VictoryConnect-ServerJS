@@ -1,5 +1,5 @@
 const Logger = require('disnode-logger');
-
+const Config = require("../config");
 var topicList = [];
 
 module.exports.AddTopic = (topic) => {
@@ -11,6 +11,18 @@ module.exports.SetTopic = (path, value, upset = false) => {
     const topic_ = this.GetTopicStrict(path);
     if (topic_.length <= 0 || topic_[0] == {}) {
         Logger.Warning("TopicManager", "SetTopic", `Failed to find topic at ${path}`)
+        if(Config.autoGenerateTopics){
+            Logger.Info("TopicManager", "SetTopic", `Auto-Generating Topic:  ${path}`)
+            module.exports.AddTopic({
+                name: path + "-autogen",
+                path: path,
+                protocol: "TCP"
+            });
+            module.exports.SetTopic(path,value);
+            
+            
+
+        }
         return;
     }
     
